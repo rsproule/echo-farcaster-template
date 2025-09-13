@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { sdk } from "@farcaster/miniapp-sdk";
 import { useMiniApp } from "@neynar/react";
+import { useEffect } from "react";
 import { Header } from "~/components/ui/Header";
-import { Footer } from "~/components/ui/Footer";
-import { HomeTab, ActionsTab, ContextTab, WalletTab } from "~/components/ui/tabs";
-import { USE_WALLET } from "~/lib/constants";
+import { HomeTab } from "~/components/ui/tabs";
 import { useNeynarUser } from "../hooks/useNeynarUser";
 
 // --- Types ---
@@ -18,48 +17,44 @@ export enum Tab {
 
 export interface AppProps {
   title?: string;
+  signedIn?: boolean;
 }
 
 /**
  * App component serves as the main container for the mini app interface.
- * 
+ *
  * This component orchestrates the overall mini app experience by:
  * - Managing tab navigation and state
  * - Handling Farcaster mini app initialization
  * - Coordinating wallet and context state
  * - Providing error handling and loading states
  * - Rendering the appropriate tab content based on user selection
- * 
+ *
  * The component integrates with the Neynar SDK for Farcaster functionality
  * and Wagmi for wallet management. It provides a complete mini app
  * experience with multiple tabs for different functionality areas.
- * 
+ *
  * Features:
  * - Tab-based navigation (Home, Actions, Context, Wallet)
  * - Farcaster mini app integration
  * - Wallet connection management
  * - Error handling and display
  * - Loading states for async operations
- * 
+ *
  * @param props - Component props
  * @param props.title - Optional title for the mini app (defaults to "Neynar Starter Kit")
- * 
+ *
  * @example
  * ```tsx
  * <App title="My Mini App" />
  * ```
  */
 export default function App(
-  { title }: AppProps = { title: "Neynar Starter Kit" }
+  { title, signedIn }: AppProps = { title: "Neynar Starter Kit" },
 ) {
   // --- Hooks ---
-  const {
-    isSDKLoaded,
-    context,
-    setInitialTab,
-    setActiveTab,
-    currentTab,
-  } = useMiniApp();
+  const { isSDKLoaded, context, setInitialTab, setActiveTab, currentTab } =
+    useMiniApp();
 
   // --- Neynar user hook ---
   const { user: neynarUser } = useNeynarUser(context || undefined);
@@ -67,7 +62,7 @@ export default function App(
   // --- Effects ---
   /**
    * Sets the initial tab to "home" when the SDK is loaded.
-   * 
+   *
    * This effect ensures that users start on the home tab when they first
    * load the mini app. It only runs when the SDK is fully loaded to
    * prevent errors during initialization.
@@ -77,6 +72,20 @@ export default function App(
       setInitialTab(Tab.Home);
     }
   }, [isSDKLoaded, setInitialTab]);
+
+  // Signal readiness to Farcaster so the splash screen can dismiss
+  useEffect(() => {
+    if (!isSDKLoaded) return;
+    // Defer to next tick to ensure initial UI has rendered
+    const id = setTimeout(() => {
+      try {
+        sdk.actions.ready();
+      } catch (e) {
+        console.error("Failed to call sdk.actions.ready():", e);
+      }
+    }, 0);
+    return () => clearTimeout(id);
+  }, [isSDKLoaded]);
 
   // --- Early Returns ---
   if (!isSDKLoaded) {
@@ -105,19 +114,9 @@ export default function App(
 
       {/* Main content and footer should be centered */}
       <div className="container py-2 pb-20">
-        {/* Main title */}
         <h1 className="text-2xl font-bold text-center mb-4">{title}</h1>
-
-        {/* Tab content rendering */}
-        {currentTab === Tab.Home && <HomeTab />}
-        {currentTab === Tab.Actions && <ActionsTab />}
-        {currentTab === Tab.Context && <ContextTab />}
-        {currentTab === Tab.Wallet && <WalletTab />}
-
-        {/* Footer with navigation */}
-        <Footer activeTab={currentTab as Tab} setActiveTab={setActiveTab} showWallet={USE_WALLET} />
+        {currentTab === Tab.Home && <HomeTab signedIn={signedIn} />}
       </div>
     </div>
   );
 }
-

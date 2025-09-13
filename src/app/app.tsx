@@ -9,7 +9,9 @@ const AppComponent = dynamic(() => import("~/components/App"), {
 });
 
 export default function App(
-  { title }: { title?: string } = { title: APP_NAME }
+  { title, signedIn }: { title?: string; signedIn?: boolean } = {
+    title: APP_NAME,
+  },
 ) {
-  return <AppComponent title={title} />;
+  return <AppComponent title={title} signedIn={signedIn} />;
 }
