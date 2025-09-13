@@ -33,6 +33,9 @@ importers:
       '@farcaster/mini-app-solana':
         specifier: '>=0.0.17 <1.0.0'
         version: 0.0.20(@farcaster/frame-sdk@0.1.10(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))(@solana/wallet-adapter-base@0.9.27(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)))(@solana/wallet-adapter-react@0.15.39(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(bs58@5.0.0)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.13)(bufferutil@4.0.9)(react@19.1.1)(utf-8-validate@5.0.10))(react@19.1.1))(bufferutil@4.0.9)(react@19.1.1)(typescript@5.9.2)(utf-8-validate@5.0.10)
+      '@farcaster/miniapp-core':
+        specifier: ^0.3.9
+        version: 0.3.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@farcaster/miniapp-node':
         specifier: '>=0.1.5 <1.0.0'
         version: 0.1.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)

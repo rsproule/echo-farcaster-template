@@ -51,6 +51,8 @@ export const APP_ICON_URL: string = `${APP_URL}/icon.png`;
 
 /**
  * URL for the app's Open Graph image.
+export { SendSolana } from './SendSolana'; 
+
  * Used for social media sharing and previews.
  */
 export const APP_OG_IMAGE_URL: string = `${APP_URL}/api/opengraph-image`;
