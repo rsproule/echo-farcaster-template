@@ -25,6 +25,7 @@ export function HomeTab({ signedIn }: { signedIn?: boolean }) {
   const { context } = useMiniApp();
   console.log("context", context);
   const fid = useMemo(() => context?.user?.fid, [context?.user?.fid]);
+  const [totalCasts, setTotalCasts] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -38,10 +39,37 @@ export function HomeTab({ signedIn }: { signedIn?: boolean }) {
       }
     })();
   }, [echo]);
+
+  // Load total casts when we have a fid
+  useEffect(() => {
+    if (!fid) {
+      setTotalCasts(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/farcaster/user-casts?fid=${fid}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        setTotalCasts(Array.isArray(data?.casts) ? data.casts.length : null);
+      } catch (_err) {
+        if (!cancelled) return;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fid]);
   return (
     <div className="flex items-center justify-center h-[calc(100vh-200px)] px-6">
       <div className="text-center w-full max-w-md mx-auto">
         <p className="text-lg mb-2">FID: {fid}</p>
+        {fid && totalCasts !== null && (
+          <p className="text-sm mt-1">Total casts: {totalCasts}</p>
+        )}
+        <p>Total casts: {totalCasts}</p>
         {!loading && !signedIn && (
           <div className="mt-4">
             <EchoSignInButton />
