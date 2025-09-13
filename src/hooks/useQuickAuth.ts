@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { sdk } from '@farcaster/miniapp-sdk';
+import { sdk } from "@farcaster/miniapp-sdk";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Represents the current authenticated user state
@@ -14,7 +14,7 @@ interface AuthenticatedUser {
 /**
  * Possible authentication states for QuickAuth
  */
-type QuickAuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
+type QuickAuthStatus = "loading" | "authenticated" | "unauthenticated";
 
 /**
  * Return type for the useQuickAuth hook
@@ -66,7 +66,7 @@ export function useQuickAuth(): UseQuickAuthReturn {
   const [authenticatedUser, setAuthenticatedUser] =
     useState<AuthenticatedUser | null>(null);
   // Current authentication status
-  const [status, setStatus] = useState<QuickAuthStatus>('loading');
+  const [status, setStatus] = useState<QuickAuthStatus>("loading");
 
   /**
    * Validates a QuickAuth token with the server-side API
@@ -78,9 +78,9 @@ export function useQuickAuth(): UseQuickAuthReturn {
     authToken: string,
   ): Promise<AuthenticatedUser | null> => {
     try {
-      const validationResponse = await fetch('/api/auth/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const validationResponse = await fetch("/api/auth/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: authToken }),
       });
 
@@ -91,7 +91,7 @@ export function useQuickAuth(): UseQuickAuthReturn {
 
       return null;
     } catch (error) {
-      console.error('Token validation failed:', error);
+      console.error("Token validation failed:", error);
       return null;
     }
   };
@@ -113,18 +113,27 @@ export function useQuickAuth(): UseQuickAuthReturn {
           if (validatedUserSession) {
             // Token is valid, set authenticated state
             setAuthenticatedUser(validatedUserSession);
-            setStatus('authenticated');
+            // Ensure a partitioned HttpOnly session cookie exists in the iframe's context
+            try {
+              await fetch("/api/session/issue", {
+                method: "POST",
+                credentials: "include",
+              });
+            } catch (e) {
+              console.error("Failed to issue session cookie:", e);
+            }
+            setStatus("authenticated");
           } else {
             // Token is invalid or expired, clear authentication state
-            setStatus('unauthenticated');
+            setStatus("unauthenticated");
           }
         } else {
           // No existing token found, user is not authenticated
-          setStatus('unauthenticated');
+          setStatus("unauthenticated");
         }
       } catch (error) {
-        console.error('Error checking existing authentication:', error);
-        setStatus('unauthenticated');
+        console.error("Error checking existing authentication:", error);
+        setStatus("unauthenticated");
       }
     };
 
@@ -142,7 +151,7 @@ export function useQuickAuth(): UseQuickAuthReturn {
    */
   const signIn = useCallback(async (): Promise<boolean> => {
     try {
-      setStatus('loading');
+      setStatus("loading");
 
       // Get QuickAuth session token
       const { token } = await sdk.quickAuth.getToken();
@@ -154,17 +163,26 @@ export function useQuickAuth(): UseQuickAuthReturn {
         if (validatedUserSession) {
           // Authentication successful, update user state
           setAuthenticatedUser(validatedUserSession);
-          setStatus('authenticated');
+          // Mint a partitioned HttpOnly session cookie for server auth in the iframe
+          try {
+            await fetch("/api/session/issue", {
+              method: "POST",
+              credentials: "include",
+            });
+          } catch (e) {
+            console.error("Failed to issue session cookie:", e);
+          }
+          setStatus("authenticated");
           return true;
         }
       }
 
       // Authentication failed, clear user state
-      setStatus('unauthenticated');
+      setStatus("unauthenticated");
       return false;
     } catch (error) {
-      console.error('Sign-in process failed:', error);
-      setStatus('unauthenticated');
+      console.error("Sign-in process failed:", error);
+      setStatus("unauthenticated");
       return false;
     }
   }, []);
@@ -179,7 +197,7 @@ export function useQuickAuth(): UseQuickAuthReturn {
   const signOut = useCallback(async (): Promise<void> => {
     // Clear local user state
     setAuthenticatedUser(null);
-    setStatus('unauthenticated');
+    setStatus("unauthenticated");
   }, []);
 
   /**
@@ -192,7 +210,7 @@ export function useQuickAuth(): UseQuickAuthReturn {
       const { token } = await sdk.quickAuth.getToken();
       return token;
     } catch (error) {
-      console.error('Failed to retrieve authentication token:', error);
+      console.error("Failed to retrieve authentication token:", error);
       return null;
     }
   }, []);
