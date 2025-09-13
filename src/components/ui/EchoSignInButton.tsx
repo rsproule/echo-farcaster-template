@@ -1,14 +1,17 @@
 "use client";
 
-import { signIn } from "@merit-systems/echo-next-sdk/client";
+import { sdk } from "@farcaster/miniapp-sdk";
 import { Button } from "./Button";
 
 export function EchoSignInButton() {
   return (
     <Button
-      onClick={() => {
+      onClick={async () => {
         console.log("signing in with echo");
-        signIn();
+        await sdk.actions.openUrl({
+          url: "https://echo-farcaster-template.vercel.app/api/echo/signin",
+        });
+        // signIn();
       }}
       size="lg"
     >
