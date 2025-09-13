@@ -1,4 +1,4 @@
-import { type AccountAssociation } from "@farcaster/miniapp-core/esm/manifest";
+import { type AccountAssociation } from "@farcaster/miniapp-core/dist/manifest";
 
 /**
  * Application constants and configuration values.
